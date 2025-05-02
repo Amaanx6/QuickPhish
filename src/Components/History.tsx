@@ -50,7 +50,7 @@ const Comp1 = () => {
           </div>
         </GlassMorphism>
         
-        <GlassMorphism variant="card" className="p-4"> 
+        <GlassMorphism variant="card" className="p-4">   
           <div className="flex items-center">
             <div className="p-2 rounded-full bg-red-500 bg-opacity-20 mr-2">
               <Shield className="w-5 h-5 text-white" />
