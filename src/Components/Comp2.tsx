@@ -2,7 +2,7 @@
 
 const Comp2 = () => {
   return (
-    <div>Comp2</div>
+    <div>Comp2  </div>
   )
 }
 
