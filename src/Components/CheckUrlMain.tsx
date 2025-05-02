@@ -74,6 +74,23 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
   const [tabId, setTabId] = useState<number | null>(null);
   const [isMalicious, setIsMalicious] = useState<boolean | null>(null);
   const [showSafeNotification, setShowSafeNotification] = useState(false);
+  const [isInteracting, setIsInteracting] = useState(false);
+
+  // Track user interactions to prevent popup closure
+  useEffect(() => {
+    const handleInteraction = () => setIsInteracting(true);
+    const handleMouseLeave = () => setIsInteracting(false);
+
+    window.addEventListener('click', handleInteraction);
+    window.addEventListener('mousemove', handleInteraction);
+    window.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('mousemove', handleInteraction);
+      window.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchUrlAndCheck = async () => {
@@ -130,12 +147,12 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
     const scanningTimer = setTimeout(() => {
       setIsScanning(false);
       // If not malicious, approve and show safe notification
-      if (isMalicious === false && tabId && activePanel === 'main') {
+      if (isMalicious === false && tabId && activePanel === 'main' && !isInteracting) {
         handleApprove();
         setShowSafeNotification(true);
         setTimeout(() => {
           setShowSafeNotification(false);
-          if (activePanel === 'main') {
+          if (activePanel === 'main' && !isInteracting) {
             window.close();
           }
         }, 3000); // Close after 3 seconds
@@ -144,14 +161,14 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
 
     // Cleanup timer on component unmount
     return () => clearTimeout(scanningTimer);
-  }, [isMalicious, tabId, activePanel]);
+  }, [isMalicious, tabId, activePanel, isInteracting]);
 
   const handleApprove = () => {
     if (tabId) {
       chrome.runtime.sendMessage(
         { type: "APPROVE_URL", tabId },
         (response) => {
-          if (response?.success && isMalicious && activePanel === 'main') {
+          if (response?.success && isMalicious && activePanel === 'main' && !isInteracting) {
             // Increment blockedCount for malicious URLs approved
             chrome.storage.local.get(['blockedCount'], (result) => {
               const blockedCount = result.blockedCount || 0;
@@ -169,7 +186,7 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
       chrome.runtime.sendMessage(
         { type: "BLOCK_URL", tabId },
         () => {
-          if (activePanel === 'main') {
+          if (activePanel === 'main' && !isInteracting) {
             // Increment blockedCount for malicious URLs blocked
             chrome.storage.local.get(['blockedCount'], (result) => {
               const blockedCount = result.blockedCount || 0;
