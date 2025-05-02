@@ -123,7 +123,7 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
           }
         }, 3000); // Close after 3 seconds
       }
-    }, 2000); // 2 seconds for scanning
+    }, 700); // 2 seconds for scanning
 
     // Cleanup timer on component unmount
     return () => clearTimeout(scanningTimer);
