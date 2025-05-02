@@ -1,6 +1,6 @@
 
 
-const Comp2 = () => {
+const Comp2 = () => { 
   return (
     <div>Comp2  </div>
   )
