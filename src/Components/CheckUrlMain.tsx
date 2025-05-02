@@ -75,6 +75,7 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
   const [isMalicious, setIsMalicious] = useState<boolean | null>(null);
   const [showSafeNotification, setShowSafeNotification] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
+  //@ts-ignore
   const interactionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Track user interactions with extended events
@@ -167,6 +168,7 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
 
   // Separate effect for safe notification timeout and popup closure
   useEffect(() => {
+    //@ts-ignore
     let safeNotificationTimer: NodeJS.Timeout | null = null;
     if (showSafeNotification && activePanel === 'main' && !isInteracting) {
       safeNotificationTimer = setTimeout(() => {
@@ -261,7 +263,7 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
           
           <GlassMorphism variant="card" className="p-4 max-w-xs text-center">
             <p className="text-base font-medium">Scanning for threats...</p>
-            <p className="text-sm text-gray-300 mt-1">Analyzing URL patterns and checking security databases</p>
+            <p className="text-sm text-blue-500 mt-1">Analyzing URL patterns and checking security databases</p>
           </GlassMorphism>
         </motion.div>
       ) : showSafeNotification ? (
@@ -289,11 +291,11 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
             <h2 className="text-lg font-semibold mb-2 text-green-400">
               This website is safe
             </h2>
-            <p className="text-sm text-gray-300 mb-3">
+            <p className="text-sm text-black mb-3">
               No security threats have been detected on this site.
             </p>
             <div className="p-3 rounded-md bg-white bg-opacity-5 border border-green-400 border-opacity-20 mt-2 break-all">
-              <code className="text-xs text-gray-300">{currentUrl}</code>
+              <code className="text-xs text-green-500">{currentUrl}</code>
             </div>
           </GlassMorphism>
         </motion.div>
@@ -307,14 +309,14 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
           <GlassMorphism variant="card" className="p-6">
             <div className="flex items-center mb-4">
               <div className="mr-4 p-2 rounded-full bg-red-500 bg-opacity-20">
-                <AlertTriangle className="w-6 h-6 text-red-400" />
+                <AlertTriangle className="w-6 h-6 text-white" />
               </div>
               <h2 className="text-xl font-bold text-red-400">
                 Phishing Threat Detected
               </h2>
             </div>
             
-            <div className="p-3 rounded-md bg-white bg-opacity-5 border border-white border-opacity-10 break-all mb-4">
+            <div className="p-3 rounded-md bg-white bg-opacity-5 border border-black border-opacity-10 break-all mb-4">
               <div className="flex items-center mb-1">
                 <ExternalLink className="w-4 h-4 text-red-300 mr-2" />
                 <span className="text-xs text-red-300">URL</span>
@@ -322,8 +324,8 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
               <code className="text-sm text-red-400">{currentUrl}</code>
             </div>
 
-            <GlassMorphism className="p-4 bg-red-900 bg-opacity-20 border-red-500 border-opacity-30 mb-6">
-              <p className="text-sm text-red-200">
+            <GlassMorphism className="p-4 bg-red-400 border-opacity-30 mb-6">
+              <p className="text-sm text-white">
                 This link matches known phishing patterns or suspicious characteristics. 
                 Proceeding may risk your personal information and security.
               </p>
@@ -334,7 +336,7 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleBlock}
-                className="glass-button px-5 py-2.5 rounded-lg bg-gradient-to-br from-red-600 to-red-800 text-white font-medium text-sm hover:shadow-lg"
+                className="glass-button px-5 py-2.5 rounded-lg bg-blue-400 text-white font-medium text-sm hover:shadow-lg"
               >
                 Block & Report
               </motion.button>
@@ -342,18 +344,14 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleApprove}
-                className="glass-button px-5 py-2.5 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 text-white font-medium text-sm hover:shadow-lg"
+                className="glass-button px-5 py-2.5 rounded-lg bg-red-500 text-white font-medium text-sm hover:shadow-lg"
               >
                 Proceed Anyway
               </motion.button>
             </div>
           </GlassMorphism>
           
-          <GlassMorphism className="p-4 text-center">
-            <p className="text-xs text-gray-400">
-              QuickPhish has prevented <span className="font-semibold text-blue-400">231</span> phishing attacks this month
-            </p>
-          </GlassMorphism>
+          
         </motion.div>
       ) : null}
     </div>
