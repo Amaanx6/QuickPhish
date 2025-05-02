@@ -1,14 +1,27 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Clock, Calendar, ArrowUpRight } from 'lucide-react';
 import GlassMorphism from './GlassMorphism';
 
+interface ScanResult {
+  url: string;
+  date: string;
+  safe: boolean;
+}
+
 const Comp1 = () => {
-  const recentScans = [
-    { url: 'https://legitimate-store.com', date: 'Today, 2:45 PM', safe: true },
-    { url: 'https://fake-banking.ru', date: 'Yesterday, 10:12 AM', safe: false },
-    { url: 'https://email-service.com', date: 'Yesterday, 9:30 AM', safe: true },
-    { url: 'https://suspicious-login.xyz', date: '2 days ago', safe: false },
-  ];
+  const [recentScans, setRecentScans] = useState<ScanResult[]>([]);
+  const [protectedCount, setProtectedCount] = useState(0);
+  const [blockedCount, setBlockedCount] = useState(0);
+
+  useEffect(() => {
+    // Retrieve scan history and counters from local storage
+    chrome.storage.local.get(['scanHistory', 'protectedCount', 'blockedCount'], (result) => {
+      setRecentScans(result.scanHistory || []);
+      setProtectedCount(result.protectedCount || 0);
+      setBlockedCount(result.blockedCount || 0);
+    });
+  }, []);
 
   return (
     <div className="w-full h-full p-6 flex flex-col overflow-auto">
@@ -32,7 +45,7 @@ const Comp1 = () => {
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-300">Protected</h3>
-              <p className="text-xl font-bold text-white">143</p>
+              <p className="text-xl font-bold text-white">{protectedCount}</p>
             </div>
           </div>
         </GlassMorphism>
@@ -44,7 +57,7 @@ const Comp1 = () => {
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-300">Blocked</h3>
-              <p className="text-xl font-bold text-white">37</p>
+              <p className="text-xl font-bold text-white">{blockedCount}</p>
             </div>
           </div>
         </GlassMorphism>
@@ -56,30 +69,36 @@ const Comp1 = () => {
       </h2>
 
       <div className="space-y-3">
-        {recentScans.map((scan, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.3 }}
-          >
-            <GlassMorphism variant="card" className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center mb-1">
-                    <div className={`w-2 h-2 rounded-full ${scan.safe ? 'bg-green-400' : 'bg-red-400'} mr-2`}></div>
-                    <h3 className="text-sm font-medium truncate">{scan.url}</h3>
+        {recentScans.length === 0 ? (
+          <GlassMorphism variant="card" className="p-4 text-center">
+            <p className="text-sm text-gray-400">No scans yet.</p>
+          </GlassMorphism>
+        ) : (
+          recentScans.map((scan, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.3 }}
+            >
+              <GlassMorphism variant="card" className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center mb-1">
+                      <div className={`w-2 h-2 rounded-full ${scan.safe ? 'bg-green-400' : 'bg-red-400'} mr-2`}></div>
+                      <h3 className="text-sm font-medium truncate">{scan.url}</h3>
+                    </div>
+                    <div className="flex items-center text-xs text-gray-400">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      {scan.date}
+                    </div>
                   </div>
-                  <div className="flex items-center text-xs text-gray-400">
-                    <Calendar className="w-3 h-3 mr-1" />
-                    {scan.date}
-                  </div>
+                  <ArrowUpRight className="w-4 h-4 text-gray-400" />
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-gray-400" />
-              </div>
-            </GlassMorphism>
-          </motion.div>
-        ))}
+              </GlassMorphism>
+            </motion.div>
+          ))
+        )}
       </div>
     </div>
   );
