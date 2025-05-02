@@ -164,7 +164,10 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
         <p className="text-gray-400 text-sm mt-1">Ask about phishing or the scanned URL</p>
       </motion.div>
 
-      <GlassMorphism variant="card" className="flex-1 flex flex-col rounded-lg overflow-hidden">
+      <GlassMorphism
+        variant="card"
+        className="flex-1 flex flex-col rounded-xl bg-white bg-opacity-10 backdrop-blur-md border border-blue-500 border-opacity-20"
+      >
         <div className="flex-1 p-4 overflow-y-auto">
           <AnimatePresence>
             {messages.slice(0).reverse().map((message) => (
@@ -176,53 +179,64 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
                 transition={{ duration: 0.3 }}
                 className={`mb-4 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div
-                  className={`max-w-[70%] p-3 rounded-lg ${
+                <motion.div
+                  className={`max-w-[75%] p-3 rounded-xl shadow-sm ${
                     message.role === 'user'
-                      ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
-                      : 'bg-gray-600 text-gray-100'
+                      ? 'bg-gradient-to-br from-blue-500 to-indigo-500 text-white'
+                      : 'bg-white bg-opacity-10 backdrop-blur-md text-gray-100 border border-blue-500 border-opacity-20'
                   }`}
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
                 >
                   <div className="flex items-center mb-1">
                     {message.role === 'bot' && (
-                      <MessageCircle className="w-4 h-4 mr-2 text-blue-400" />
+                      <motion.div
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <MessageCircle className="w-4 h-4 mr-2 text-blue-400" />
+                      </motion.div>
                     )}
-                    <span className="text-xs text-gray-300">{message.timestamp}</span>
+                    <span className="text-xs bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                      {message.timestamp}
+                    </span>
                   </div>
-                  <p className="text-sm">{message.content}</p>
-                </div>
+                  <p className="text-sm text-black">{message.content}</p>
+                </motion.div>
               </motion.div>
             ))}
           </AnimatePresence>
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-4 border-t border-gray-600">
-          <div className="flex items-center">
+        <GlassMorphism
+          className="p-3 bg-white bg-opacity-10 backdrop-blur-md border-t border-blue-500 border-opacity-20"
+        >
+          <div className="flex items-center gap-2">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask about the URL or phishing..."
-              className="flex-1 p-2 bg-gray-700 bg-opacity-80 text-white rounded-l-lg border-none focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all resize-none"
+              className="flex-1 p-3 bg-white bg-opacity-10 backdrop-blur-md text-white rounded-xl border border-blue-500 border-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition-all resize-none"
               rows={2}
               disabled={isLoading}
             />
             <motion.button
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.1, boxShadow: '0 0 10px rgba(59, 130, 246, 0.5)' }}
               whileTap={{ scale: 0.95 }}
-              className={`p-2 rounded-r-lg ${
+              className={`p-3 rounded-xl ${
                 isLoading || !input.trim()
-                  ? 'bg-gray-500 cursor-not-allowed'
-                  : 'bg-blue-500'
+                  ? 'bg-gray-600 bg-opacity-50 cursor-not-allowed'
+                  : 'bg-gradient-to-br from-blue-600 to-indigo-600'
               }`}
             >
               <Send className="w-5 h-5 text-white" />
             </motion.button>
           </div>
-        </div>
+        </GlassMorphism>
       </GlassMorphism>
     </div>
   );
