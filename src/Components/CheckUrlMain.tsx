@@ -4,7 +4,7 @@ import { Shield, AlertTriangle, ExternalLink } from 'lucide-react';
 import GlassMorphism from './GlassMorphism';
 import StatusIndicator from './StatusIndicator';
 
-// Phishing detection service (unchanged)
+// Phishing detection service
 const checkPhishing = async (url: string): Promise<boolean> => {
   // Local heuristic checks
   const suspiciousPatterns = [
@@ -68,7 +68,7 @@ const checkPhishing = async (url: string): Promise<boolean> => {
   }
 };
 
-export function CheckUrlMain() {
+export function CheckUrlMain({ activePanel }: { activePanel: string }) {
   const [currentUrl, setCurrentUrl] = useState('');
   const [isScanning, setIsScanning] = useState(true);
   const [tabId, setTabId] = useState<number | null>(null);
@@ -113,29 +113,29 @@ export function CheckUrlMain() {
     const scanningTimer = setTimeout(() => {
       setIsScanning(false);
       // If not malicious, approve and show safe notification
-      if (isMalicious === false && tabId) {
+      if (isMalicious === false && tabId && activePanel === 'main') {
         handleApprove();
         setShowSafeNotification(true);
         setTimeout(() => {
           setShowSafeNotification(false);
-          window.close();
+          if (activePanel === 'main') {
+            window.close();
+          }
         }, 3000); // Close after 3 seconds
       }
     }, 2000); // 2 seconds for scanning
 
     // Cleanup timer on component unmount
     return () => clearTimeout(scanningTimer);
-  }, [isMalicious, tabId]);
+  }, [isMalicious, tabId, activePanel]);
 
   const handleApprove = () => {
     if (tabId) {
       chrome.runtime.sendMessage(
         { type: "APPROVE_URL", tabId },
         (response) => {
-          if (response?.success) {
-            if (isMalicious) {
-              window.close(); // Close popup only after user approval for malicious
-            }
+          if (response?.success && isMalicious && activePanel === 'main') {
+            window.close(); // Close popup only after user approval for malicious
           }
         }
       );
@@ -146,7 +146,11 @@ export function CheckUrlMain() {
     if (tabId) {
       chrome.runtime.sendMessage(
         { type: "BLOCK_URL", tabId },
-        () => window.close() // Close popup after blocking
+        () => {
+          if (activePanel === 'main') {
+            window.close(); // Close popup after blocking
+          }
+        }
       );
     }
   };

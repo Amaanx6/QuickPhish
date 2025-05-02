@@ -14,7 +14,7 @@ const Layout: React.FC = () => {
   const renderActivePanel = () => {
     switch (activePanel) {
       case 'main':
-        return <CheckUrlMain />;
+        return <CheckUrlMain activePanel={activePanel} />;
       case 'comp1':
         return <Comp1 />;
       case 'comp2':
@@ -22,7 +22,7 @@ const Layout: React.FC = () => {
       case 'comp3':
         return <Comp3 />;
       default:
-        return <CheckUrlMain />;
+        return <CheckUrlMain activePanel={activePanel} />;
     }
   };
 
