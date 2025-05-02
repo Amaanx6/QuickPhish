@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Clock, BookOpen, Settings, AlertCircle } from 'lucide-react';
+import { Shield, Clock, BookOpen, MessageCircle, AlertCircle } from 'lucide-react';
 import { NavItem } from './types';
 import GlassMorphism from './GlassMorphism';
 
@@ -14,7 +14,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
     { name: 'Protect', icon: 'shield', id: 'main' },
     { name: 'History', icon: 'clock', id: 'comp1' },
     { name: 'Learn', icon: 'book', id: 'comp2' },
-    { name: 'Settings', icon: 'settings', id: 'comp3' },
+    { name: 'ChatBot', icon: 'message', id: 'comp3' },
   ];
 
   const getIcon = (iconName: string, isActive: boolean) => {
@@ -27,8 +27,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
         return <Clock className={className} />;
       case 'book':
         return <BookOpen className={className} />;
-      case 'settings':
-        return <Settings className={className} />;
+      case 'message':
+        return <MessageCircle className={className} />;
       default:
         return <Shield className={className} />;
     }
