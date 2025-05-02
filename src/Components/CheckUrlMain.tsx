@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, AlertTriangle, ExternalLink } from 'lucide-react';
 import GlassMorphism from './GlassMorphism';
@@ -75,23 +75,33 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
   const [isMalicious, setIsMalicious] = useState<boolean | null>(null);
   const [showSafeNotification, setShowSafeNotification] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
+  const interactionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Track user interactions to prevent popup closure
+  // Track user interactions with extended events
   useEffect(() => {
-    const handleInteraction = () => setIsInteracting(true);
-    const handleMouseLeave = () => setIsInteracting(false);
+    const handleInteraction = () => {
+      setIsInteracting(true);
+      // Keep isInteracting true for 2 seconds after last interaction
+      if (interactionTimeoutRef.current) {
+        clearTimeout(interactionTimeoutRef.current);
+      }
+      interactionTimeoutRef.current = setTimeout(() => {
+        setIsInteracting(false);
+      }, 2000);
+    };
 
-    window.addEventListener('click', handleInteraction);
-    window.addEventListener('mousemove', handleInteraction);
-    window.addEventListener('mouseleave', handleMouseLeave);
+    const events = ['click', 'mousemove', 'keydown', 'touchstart', 'focus'];
+    events.forEach(event => window.addEventListener(event, handleInteraction));
 
     return () => {
-      window.removeEventListener('click', handleInteraction);
-      window.removeEventListener('mousemove', handleInteraction);
-      window.removeEventListener('mouseleave', handleMouseLeave);
+      events.forEach(event => window.removeEventListener(event, handleInteraction));
+      if (interactionTimeoutRef.current) {
+        clearTimeout(interactionTimeoutRef.current);
+      }
     };
   }, []);
 
+  // Handle scanning and safe notification logic
   useEffect(() => {
     const fetchUrlAndCheck = async () => {
       try {
@@ -146,22 +156,33 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
     // Set a 2-second timer for scanning
     const scanningTimer = setTimeout(() => {
       setIsScanning(false);
-      // If not malicious, approve and show safe notification
-      if (isMalicious === false && tabId && activePanel === 'main' && !isInteracting) {
+      if (isMalicious === false && tabId && activePanel === 'main') {
         handleApprove();
         setShowSafeNotification(true);
-        setTimeout(() => {
-          setShowSafeNotification(false);
-          if (activePanel === 'main' && !isInteracting) {
-            window.close();
-          }
-        }, 3000); // Close after 3 seconds
       }
-    }, 700); // 2 seconds for scanning
+    }, 2000); // 2 seconds for scanning
 
-    // Cleanup timer on component unmount
     return () => clearTimeout(scanningTimer);
-  }, [isMalicious, tabId, activePanel, isInteracting]);
+  }, [isMalicious, tabId, activePanel]);
+
+  // Separate effect for safe notification timeout and popup closure
+  useEffect(() => {
+    let safeNotificationTimer: NodeJS.Timeout | null = null;
+    if (showSafeNotification && activePanel === 'main' && !isInteracting) {
+      safeNotificationTimer = setTimeout(() => {
+        setShowSafeNotification(false);
+        if (activePanel === 'main' && !isInteracting) {
+          window.close();
+        }
+      }, 3000); // Close after 3 seconds
+    }
+
+    return () => {
+      if (safeNotificationTimer) {
+        clearTimeout(safeNotificationTimer);
+      }
+    };
+  }, [showSafeNotification, activePanel, isInteracting]);
 
   const handleApprove = () => {
     if (tabId) {

@@ -18,9 +18,6 @@ function removePendingUrl(tabId) {
 // Track pages we've already processed
 const processedUrls = new Set();
 
-// Track window ID to prevent multiple windows
-let extensionWindowId = null;
-
 // Listen for webNavigation events
 chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
   // Only process main frame navigations (not iframes)
@@ -44,28 +41,8 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
   // Store URL for approval
   await setPendingUrl(details.tabId, details.url);
   
-  // Open a custom window instead of popup
-  if (extensionWindowId === null) {
-    chrome.windows.create({
-      url: chrome.runtime.getURL('popup.html'),
-      type: 'popup',
-      width: 400,
-      height: 600,
-      focused: true
-    }, (window) => {
-      extensionWindowId = window.id;
-    });
-  } else {
-    // Focus the existing window
-    chrome.windows.update(extensionWindowId, { focused: true });
-  }
-});
-
-// Listen for window close to reset window ID
-chrome.windows.onRemoved.addListener((windowId) => {
-  if (windowId === extensionWindowId) {
-    extensionWindowId = null;
-  }
+  // Open the extension popup
+  chrome.action.openPopup();
 });
 
 // Listen for messages from content script and popup
