@@ -68,29 +68,38 @@ const checkPhishing = async (url: string): Promise<boolean> => {
   }
 };
 
-export function CheckUrlMain({ activePanel }: { activePanel: string }) {
-  const [currentUrl, setCurrentUrl] = useState('');
+export function CheckUrlMain({ 
+  activePanel, 
+  setIsMalicious, 
+  setCurrentUrl 
+}: { 
+  activePanel: string;
+  setIsMalicious: (value: boolean | null) => void;
+  setCurrentUrl: (value: string) => void;
+}) {
+  const [localCurrentUrl, setLocalCurrentUrl] = useState('');
   const [isScanning, setIsScanning] = useState(true);
   const [tabId, setTabId] = useState<number | null>(null);
-  const [isMalicious, setIsMalicious] = useState<boolean | null>(null);
+  const [localIsMalicious, setLocalIsMalicious] = useState<boolean | null>(null);
   const [showSafeNotification, setShowSafeNotification] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
   const interactionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const safeNotificationTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Track user interactions with extended events
   useEffect(() => {
     const handleInteraction = () => {
       setIsInteracting(true);
-      // Keep isInteracting true for 2 seconds after last interaction
+      // Keep isInteracting true for 3 seconds after last interaction
       if (interactionTimeoutRef.current) {
         clearTimeout(interactionTimeoutRef.current);
       }
       interactionTimeoutRef.current = setTimeout(() => {
         setIsInteracting(false);
-      }, 2000);
+      }, 3000);
     };
 
-    const events = ['click', 'mousemove', 'keydown', 'touchstart', 'focus'];
+    const events = ['click', 'mousemove', 'keydown', 'touchstart', 'focus', 'scroll'];
     events.forEach(event => window.addEventListener(event, handleInteraction));
 
     return () => {
@@ -101,7 +110,7 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
     };
   }, []);
 
-  // Handle scanning and safe notification logic
+  // Handle scanning logic
   useEffect(() => {
     const fetchUrlAndCheck = async () => {
       try {
@@ -122,9 +131,11 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
               }
 
               if (response?.url) {
-                setCurrentUrl(response.url);
+                setLocalCurrentUrl(response.url);
+                setCurrentUrl(response.url); // Update parent state
                 const maliciousStatus = await checkPhishing(response.url);
-                setIsMalicious(maliciousStatus);
+                setLocalIsMalicious(maliciousStatus);
+                setIsMalicious(maliciousStatus); // Update parent state
 
                 // Store scan result in local storage
                 const scanResult = {
@@ -156,20 +167,19 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
     // Set a 2-second timer for scanning
     const scanningTimer = setTimeout(() => {
       setIsScanning(false);
-      if (isMalicious === false && tabId && activePanel === 'main') {
+      if (localIsMalicious === false && tabId && activePanel === 'main') {
         handleApprove();
         setShowSafeNotification(true);
       }
     }, 2000); // 2 seconds for scanning
 
     return () => clearTimeout(scanningTimer);
-  }, [isMalicious, tabId, activePanel]);
+  }, [localIsMalicious, tabId, activePanel, setCurrentUrl, setIsMalicious]);
 
-  // Separate effect for safe notification timeout and popup closure
+  // Handle safe notification and popup closure
   useEffect(() => {
-    let safeNotificationTimer: NodeJS.Timeout | null = null;
     if (showSafeNotification && activePanel === 'main' && !isInteracting) {
-      safeNotificationTimer = setTimeout(() => {
+      safeNotificationTimerRef.current = setTimeout(() => {
         setShowSafeNotification(false);
         if (activePanel === 'main' && !isInteracting) {
           window.close();
@@ -178,18 +188,26 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
     }
 
     return () => {
-      if (safeNotificationTimer) {
-        clearTimeout(safeNotificationTimer);
+      if (safeNotificationTimerRef.current) {
+        clearTimeout(safeNotificationTimerRef.current);
       }
     };
   }, [showSafeNotification, activePanel, isInteracting]);
+
+  // Clear safe notification timer when navigating away from main panel
+  useEffect(() => {
+    if (activePanel !== 'main' && safeNotificationTimerRef.current) {
+      clearTimeout(safeNotificationTimerRef.current);
+      setShowSafeNotification(false);
+    }
+  }, [activePanel]);
 
   const handleApprove = () => {
     if (tabId) {
       chrome.runtime.sendMessage(
         { type: "APPROVE_URL", tabId },
         (response) => {
-          if (response?.success && isMalicious && activePanel === 'main' && !isInteracting) {
+          if (response?.success && localIsMalicious && activePanel === 'main' && !isInteracting) {
             // Increment blockedCount for malicious URLs approved
             chrome.storage.local.get(['blockedCount'], (result) => {
               const blockedCount = result.blockedCount || 0;
@@ -232,14 +250,14 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
           QuickPhish
         </h1>
         
-        {(isScanning || isMalicious !== null) && (
+        {(isScanning || localIsMalicious !== null) && (
           <StatusIndicator 
-            status={isScanning ? 'scanning' : isMalicious ? 'danger' : 'safe'} 
+            status={isScanning ? 'scanning' : localIsMalicious ? 'danger' : 'safe'} 
           />
         )}
       </motion.div>
       
-      {isScanning || isMalicious === null ? (
+      {isScanning || localIsMalicious === null ? (
         <motion.div 
           className="flex-1 flex flex-col items-center justify-center gap-4"
           initial={{ opacity: 0 }}
@@ -266,7 +284,7 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
         </motion.div>
       ) : showSafeNotification ? (
         <motion.div 
-          className="flex-1 flex flex-col items-center justify-center gap-4"
+          className="flex-1 flex flex-col items-center justify-center gap-4 " 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
@@ -293,11 +311,11 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
               No security threats have been detected on this site.
             </p>
             <div className="p-3 rounded-md bg-white bg-opacity-5 border border-green-400 border-opacity-20 mt-2 break-all">
-              <code className="text-xs text-gray-300">{currentUrl}</code>
+              <code className="text-xs text-gray-300">{localCurrentUrl}</code>
             </div>
           </GlassMorphism>
         </motion.div>
-      ) : isMalicious ? (
+      ) : localIsMalicious ? (
         <motion.div 
           className="flex-1 flex flex-col gap-4"
           initial={{ opacity: 0 }}
@@ -319,7 +337,7 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
                 <ExternalLink className="w-4 h-4 text-red-300 mr-2" />
                 <span className="text-xs text-red-300">URL</span>
               </div>
-              <code className="text-sm text-red-400">{currentUrl}</code>
+              <code className="text-sm text-red-400">{localCurrentUrl}</code>
             </div>
 
             <GlassMorphism className="p-4 bg-red-900 bg-opacity-20 border-red-500 border-opacity-30 mb-6">

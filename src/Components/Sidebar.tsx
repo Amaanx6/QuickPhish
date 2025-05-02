@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Clock, BookOpen, Settings, AlertCircle } from 'lucide-react';
+import { Shield, Clock, BookOpen, MessageCircle } from 'lucide-react';
 import { NavItem } from './types';
 import GlassMorphism from './GlassMorphism';
 
@@ -14,7 +14,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
     { name: 'Protect', icon: 'shield', id: 'main' },
     { name: 'History', icon: 'clock', id: 'comp1' },
     { name: 'Learn', icon: 'book', id: 'comp2' },
-    { name: 'Settings', icon: 'settings', id: 'comp3' },
+    { name: 'ChatBot', icon: 'message', id: 'comp3' },
   ];
 
   const getIcon = (iconName: string, isActive: boolean) => {
@@ -27,8 +27,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
         return <Clock className={className} />;
       case 'book':
         return <BookOpen className={className} />;
-      case 'settings':
-        return <Settings className={className} />;
+      case 'message':
+        return <MessageCircle className={className} />;
       default:
         return <Shield className={className} />;
     }
@@ -103,34 +103,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
           ))}
         </ul>
       </nav>
-      
-      <motion.div 
-        className="mt-auto pt-4"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.4 }}
-      >
-        <div className="relative">
-          <motion.div 
-            className="w-8 h-8 rounded-full bg-amber-500 bg-opacity-20 flex items-center justify-center"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            initial={{ scale: 1 }}
-            animate={{ 
-              scale: [1, 1.1, 1],
-              rotate: [0, 0, 0]
-            }}
-            transition={{ 
-              repeat: Infinity,
-              repeatDelay: 4,
-              duration: 0.8
-            }}
-          >
-            <AlertCircle className="w-4 h-4 text-amber-400" />
-          </motion.div>
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border border-gray-900"></span>
-        </div>
-      </motion.div>
     </GlassMorphism>
   );
 };
