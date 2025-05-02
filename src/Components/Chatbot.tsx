@@ -87,7 +87,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
               {
                 parts: [
                   {
-                    text: `You are a cybersecurity assistant for the QuickPhish browser extension. Provide concise, accurate answers about phishing, URLs, and web safety. For the URL "${currentUrl}", which is ${isMalicious ? 'malicious' : 'safe'}, respond to: ${prompt}`,
+                    text: prompt,
                   },
                 ],
               },
@@ -161,7 +161,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
         <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
           ChatBot
         </h1>
-        <p className="text-gray-400 text-sm mt-1">Ask about phishing or the scanned URL</p>
+        <p className="text-gray-400 text-sm mt-1">Ask about anything, including phishing or the scanned URL</p>
       </motion.div>
 
       <GlassMorphism
@@ -221,8 +221,8 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask about the URL or phishing..."
-              className="flex-1 p-3 bg-white bg-opacity-15 backdrop-blur-md text-gray-100 rounded-xl border border-blue-500 border-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition-all resize-none"
+              placeholder="Ask about anything..."
+              className="flex-1 p-3 bg-white bg-opacity-20 backdrop-blur-md text-white rounded-xl border border-blue-500 border-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition-all resize-none placeholder:text-white placeholder:opacity-70"
               rows={2}
               disabled={isLoading}
             />
