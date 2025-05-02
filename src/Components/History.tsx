@@ -46,7 +46,7 @@ const Comp1 = () => {
             <div>
               <h3 className="text-sm font-medium text-black">Protected</h3>
               <p className="text-xl font-bold text-blue-500">{protectedCount}</p>
-            </div>
+            </div> 
           </div>
         </GlassMorphism>
         
