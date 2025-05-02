@@ -1,6 +1,6 @@
 import { useState, MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, Link, ShieldAlert, LockKeyhole, AlertTriangle, Share2, Sun, Moon, LucideIcon } from 'lucide-react';
+import { BookOpen, Link, ShieldAlert, LockKeyhole, AlertTriangle, Share2, Key, Globe, Mail, Smartphone, UserCheck, LucideIcon } from 'lucide-react';
 import GlassMorphism from './GlassMorphism';
 
 interface PhishingTip {
@@ -14,7 +14,6 @@ interface PhishingTip {
 const Comp2: React.FC = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [viewedTips, setViewedTips] = useState<Set<number>>(new Set());
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   const phishingTips: PhishingTip[] = [
     {
@@ -44,6 +43,48 @@ const Comp2: React.FC = () => {
       description: "Be cautious with email attachments, even if they appear to come from known senders.",
       details: "Malicious attachments can contain malware. Always scan files with antivirus software and verify the sender's identity before opening.",
       learnMoreLink: "https://www.cisa.gov/secure-our-world/stop-ransomware"
+    },
+    {
+      icon: Key,
+      title: "Use strong passwords",
+      description: "Create complex passwords to protect your accounts from unauthorized access.",
+      details: "A strong password is at least 12 characters long, includes a mix of letters, numbers, and symbols, and avoids common words or personal information.",
+      learnMoreLink: "https://www.nist.gov/identity-access-management/how-create-strong-password"
+    },
+    {
+      icon: Globe,
+      title: "Use a VPN on public Wi-Fi",
+      description: "Protect your data on unsecured networks with a virtual private network.",
+      details: "A VPN encrypts your internet traffic, preventing attackers from intercepting sensitive information like passwords or credit card details on public Wi-Fi.",
+      learnMoreLink: "https://www.cisa.gov/secure-our-world/use-vpn"
+    },
+    {
+      icon: Mail,
+      title: "Verify email senders",
+      description: "Check the sender’s email address, not just the display name, to avoid spoofing.",
+      details: "Scammers can fake display names (e.g., 'Bank of America'). Always inspect the full email address and be cautious of slight misspellings or unusual domains.",
+      learnMoreLink: "https://www.consumer.ftc.gov/articles/how-recognize-and-avoid-phishing-scams"
+    },
+    {
+      icon: Smartphone,
+      title: "Enable two-factor authentication",
+      description: "Add an extra layer of security to your accounts with 2FA.",
+      details: "Two-factor authentication requires a second form of verification, like a code sent to your phone, making it harder for attackers to access your accounts.",
+      learnMoreLink: "https://www.cisa.gov/secure-our-world/two-factor-authentication"
+    },
+    {
+      icon: UserCheck,
+      title: "Beware of social engineering",
+      description: "Don’t share personal information with unsolicited contacts claiming authority.",
+      details: "Social engineering tactics, like pretending to be a coworker or IT support, trick you into revealing sensitive data. Always verify the requester’s identity.",
+      learnMoreLink: "https://www.sans.org/security-awareness-training/resources/social-engineering"
+    },
+    {
+      icon: ShieldAlert,
+      title: "Keep software updated",
+      description: "Regularly update your devices to patch security vulnerabilities.",
+      details: "Outdated software can be exploited by attackers. Enable automatic updates for your operating system, browser, and apps to stay protected.",
+      learnMoreLink: "https://www.cisa.gov/secure-our-world/update-software"
     }
   ];
 
@@ -63,12 +104,8 @@ const Comp2: React.FC = () => {
     }
   };
 
-  const toggleTheme = (): void => {
-    setIsDarkMode(!isDarkMode);
-  };
-
   return (
-    <div className={`flex flex-col h-full ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
+    <div className="flex flex-col h-full bg-gray-100">
       {/* Header */}
       <div className="p-6 pb-2">
         <div className="flex justify-between items-center mb-4">
@@ -77,19 +114,13 @@ const Comp2: React.FC = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-            <h1 className={`text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${isDarkMode ? 'from-blue-400 to-purple-500' : 'from-blue-600 to-purple-700'}`}>
+            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-700">
               Learn
             </h1>
-            <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className="text-sm mt-2 text-gray-600">
               Master the art of identifying phishing attempts
             </p>
           </motion.div>
-          <button
-            onClick={toggleTheme}
-            className={`p-2 rounded-full ${isDarkMode ? 'bg-gray-800 text-yellow-400' : 'bg-gray-200 text-gray-800'}`}
-          >
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
         </div>
       </div>
 
@@ -97,14 +128,14 @@ const Comp2: React.FC = () => {
       <div className="flex-1 overflow-y-auto px-6">
         <GlassMorphism className="p-6 mb-6 rounded-xl">
           <div className="flex items-center mb-4">
-            <div className={`p-3 rounded-full ${isDarkMode ? 'bg-blue-500 bg-opacity-20' : 'bg-blue-200'} mr-4`}>
-              <BookOpen className={`w-6 h-6 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+            <div className="p-3 rounded-full bg-blue-200 mr-4">
+              <BookOpen className="w-6 h-6 text-blue-600" />
             </div>
-            <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <h2 className="text-xl font-semibold text-gray-900">
               Phishing Protection Tips
             </h2>
           </div>
-          <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
+          <p className="text-sm text-gray-600 mb-4">
             Stay one step ahead of cybercriminals with these essential security tips.
           </p>
           <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -113,7 +144,7 @@ const Comp2: React.FC = () => {
               style={{ width: `${(viewedTips.size / phishingTips.length) * 100}%` }}
             ></div>
           </div>
-          <p className={`text-xs mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className="text-xs mt-2 text-gray-600">
             {viewedTips.size} of {phishingTips.length} tips viewed
           </p>
         </GlassMorphism>
@@ -136,14 +167,14 @@ const Comp2: React.FC = () => {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start flex-1 min-w-0">
-                    <div className={`p-3 rounded-full ${isDarkMode ? 'bg-white bg-opacity-10' : 'bg-gray-200'} mr-4`}>
-                      <tip.icon className={`w-6 h-6 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                    <div className="p-3 rounded-full bg-gray-200 mr-4">
+                      <tip.icon className="w-6 h-6 text-blue-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className={`text-lg font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
                         {tip.title}
                       </h3>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p className="text-sm text-gray-600">
                         {tip.description}
                       </p>
                       <AnimatePresence>
@@ -154,7 +185,7 @@ const Comp2: React.FC = () => {
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.2 }}
                           >
-                            <p className={`text-sm mt-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <p className="text-sm mt-3 text-gray-700">
                               {tip.details}
                             </p>
                             {tip.learnMoreLink && (
@@ -162,7 +193,7 @@ const Comp2: React.FC = () => {
                                 href={tip.learnMoreLink}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`text-sm font-medium mt-2 inline-block ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-500'}`}
+                                className="text-sm font-medium mt-2 inline-block text-blue-600 hover:text-blue-500"
                                 onClick={e => e.stopPropagation()}
                               >
                                 Learn more →
@@ -175,9 +206,9 @@ const Comp2: React.FC = () => {
                   </div>
                   <button
                     onClick={(e) => handleShare(tip, e)}
-                    className={`p-2 rounded-full ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'} flex-shrink-0`}
+                    className="p-2 rounded-full hover:bg-gray-200 flex-shrink-0"
                   >
-                    <Share2 size={18} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+                    <Share2 size={18} className="text-gray-600" />
                   </button>
                 </div>
               </GlassMorphism>
@@ -198,7 +229,7 @@ const Comp2: React.FC = () => {
             href="https://www.cisa.gov/stopransomware/phishing"
             target="_blank"
             rel="noopener noreferrer"
-            className={`text-sm font-medium ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-500'} flex items-center justify-center transition-colors duration-200`}
+            className="text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center justify-center transition-colors duration-200"
           >
             Explore more cybersecurity resources
             <ArrowIcon className="ml-2 w-4 h-4" />
