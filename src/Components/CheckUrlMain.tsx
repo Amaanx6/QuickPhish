@@ -70,6 +70,7 @@ export function CheckUrlMain() {
   const [isLoading, setIsLoading] = useState(true);
   const [tabId, setTabId] = useState<number | null>(null);
   const [isMalicious, setIsMalicious] = useState(false);
+  const [showSafeNotification, setShowSafeNotification] = useState(false);
 
   useEffect(() => {
     const fetchUrlAndCheck = async () => {
@@ -95,6 +96,17 @@ export function CheckUrlMain() {
                 setCurrentUrl(response.url);
                 const maliciousStatus = await checkPhishing(response.url);
                 setIsMalicious(maliciousStatus);
+
+                if (!maliciousStatus) {
+                  // Automatically approve safe URLs
+                  handleApprove();
+                  // Show safe notification briefly
+                  setShowSafeNotification(true);
+                  setTimeout(() => {
+                    setShowSafeNotification(false);
+                    window.close();
+                  }, 3000); // Hide after 3 seconds
+                }
               }
               setIsLoading(false);
             }
@@ -107,12 +119,6 @@ export function CheckUrlMain() {
     };
 
     fetchUrlAndCheck();
-
-    // const timer = setTimeout(() => {
-    //   if (!currentUrl) window.close();
-    // }, 10000);
-
-    // return () => clearTimeout(timer);
   }, []);
 
   const handleApprove = () => {
@@ -120,7 +126,9 @@ export function CheckUrlMain() {
       chrome.runtime.sendMessage(
         { type: "APPROVE_URL", tabId },
         (response) => {
-          if (response?.success) window.close();
+          if (response?.success) {
+            window.close(); // Close popup for both safe and malicious after approval
+          }
         }
       );
     }
@@ -130,7 +138,7 @@ export function CheckUrlMain() {
     if (tabId) {
       chrome.runtime.sendMessage(
         { type: "BLOCK_URL", tabId },
-        () => window.close()
+        () => window.close() // Close popup after blocking
       );
     }
   };
@@ -144,50 +152,49 @@ export function CheckUrlMain() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700"></div>
           <p className="text-gray-600 text-sm">Analyzing link safety...</p>
         </div>
-      ) : (
+      ) : showSafeNotification ? (
+        <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-4">
+          <p className="text-sm text-green-700">
+            This website is safe to visit.
+          </p>
+          <div className="p-3 bg-white rounded-md break-all border border-gray-300 mt-2">
+            <code className="text-sm text-gray-700">{currentUrl}</code>
+          </div>
+        </div>
+      ) : isMalicious ? (
         <>
           <div className="mb-4">
-            <h2 className={`text-lg font-semibold mb-2 ${
-              isMalicious ? 'text-red-600' : 'text-gray-800'
-            }`}>
-              {isMalicious ? '⚠️ Dangerous Link Detected' : 'Safe Navigation Approval'}
+            <h2 className="text-lg font-semibold mb-2 text-red-600">
+              ⚠️ Dangerous Link Detected
             </h2>
             <div className="p-3 bg-white rounded-md break-all border border-gray-300">
-              <code className={`text-sm ${isMalicious ? 'text-red-600' : 'text-gray-700'}`}>
-                {currentUrl}
-              </code>
+              <code className="text-sm text-red-600">{currentUrl}</code>
             </div>
           </div>
 
-          {isMalicious && (
-            <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
-              <p className="text-sm text-red-700">
-                This link matches known phishing patterns or suspicious characteristics. 
-                Proceeding may risk your security.
-              </p>
-            </div>
-          )}
+          <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+            <p className="text-sm text-red-700">
+              This link matches known phishing patterns or suspicious characteristics. 
+              Proceeding may risk your security.
+            </p>
+          </div>
 
           <div className="flex justify-end space-x-2">
             <button 
               onClick={handleBlock}
               className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"
             >
-              {isMalicious ? 'Block & Report' : 'Cancel Navigation'}
+              Block & Report
             </button>
             <button
               onClick={handleApprove}
-              className={`${
-                isMalicious 
-                  ? 'bg-yellow-500 hover:bg-yellow-600'
-                  : 'bg-green-500 hover:bg-green-600'
-              } text-white px-4 py-2 rounded-md transition-colors`}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition-colors"
             >
-              {isMalicious ? 'Proceed Anyway' : 'Approve Navigation'}
+              Proceed Anyway
             </button>
           </div>
         </>
-      )}
+      ) : null}
     </div>
   );
 }
