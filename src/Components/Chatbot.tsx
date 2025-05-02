@@ -87,7 +87,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
               {
                 parts: [
                   {
-                    text: prompt,
+                    text: `You are a cybersecurity assistant for the QuickPhish browser extension. Provide concise, accurate answers about phishing, URLs, and web safety. For the URL "${currentUrl}", which is ${isMalicious ? 'malicious' : 'safe'}, respond to: ${prompt}`,
                   },
                 ],
               },
@@ -203,7 +203,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
                       </>
                     )}
                   </div>
-                  <p className={`text-sm ${message.role === 'user' ? 'text-white' : 'text-black'}`}>
+                  <p
+                    className={`text-sm ${
+                      message.role === 'user' ? 'text-white' : 'text-black break-words'
+                    }`}
+                  >
                     {message.content}
                   </p>
                 </motion.div>
@@ -222,7 +226,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask about anything..."
-              className="flex-1 p-3 bg-white bg-opacity-20 backdrop-blur-md text-white rounded-xl border border-blue-500 border-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition-all resize-none placeholder:text-white placeholder:opacity-70"
+              className="flex-1 p-3 bg-white bg-opacity-20 backdrop-blur-md text-black rounded-xl border border-blue-500 border-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition-all resize-none placeholder:text-white placeholder:opacity-70"
               rows={2}
               disabled={isLoading}
             />
