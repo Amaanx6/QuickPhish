@@ -3,10 +3,7 @@
   "name": "QuickPhish",
   "version": "1.0",
   "permissions": ["activeTab", "tabs", "storage", "webNavigation", "scripting"],
-  "host_permissions": [
-    "<all_urls>",
-    "https://generativelanguage.googleapis.com/*"
-  ],
+  "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "index.html",
     "default_title": "QuickPhish Protection",
