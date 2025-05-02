@@ -52,7 +52,7 @@ const Comp1 = () => {
         
         <GlassMorphism variant="card" className="p-4">
           <div className="flex items-center">
-            <div className="p-2 rounded-full bg-red-500 bg-opacity-20 mr-3">
+            <div className="p-2 rounded-full bg-red-500 bg-opacity-20 mr-3"> 
               <Shield className="w-5 h-5 text-red-400" />
             </div>
             <div>
