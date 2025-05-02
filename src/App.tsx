@@ -1,135 +1,193 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
+
+// Phishing detection service
+const checkPhishing = async (url: string): Promise<boolean> => {
+  // Local heuristic checks
+  const suspiciousPatterns = [
+    /@/, // Embedded credentials
+    /^http:\/\//, // Non-HTTPS
+    /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/, // IP address
+    /\.(ru|cn|top|xyz)\//i, // Suspicious TLDs
+    /[^\w]login\.php\?redirect=/i // Common phishing paths
+  ];
+
+  if (suspiciousPatterns.some(pattern => pattern.test(url))) {
+    return true;
+  }
+
+  // Check cache
+  const cacheKey = `phish_${btoa(url)}`;
+  const cachedResult = await chrome.storage.local.get(cacheKey);
+  if (cachedResult[cacheKey]?.expires > Date.now()) {
+    return cachedResult[cacheKey].isMalicious;
+  }
+
+  // API Check with Safe Browsing
+  try {
+    const API_KEY = import.meta.env.VITE_SAFEBROWSING_KEY;
+    const response = await fetch(
+      `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client: {
+            clientId: "QuickPhish",
+            clientVersion: "1.0"
+          },
+          threatInfo: {
+            threatTypes: ["MALWARE", "SOCIAL_ENGINEERING"],
+            platformTypes: ["ANY_PLATFORM"],
+            threatEntryTypes: ["URL"],
+            threatEntries: [{ url }]
+          }
+        })
+      }
+    );
+
+    if (!response.ok) throw new Error('API request failed');
+    
+    const data = await response.json();
+    const isMalicious = data.matches?.length > 0;
+
+    // Cache result for 1 hour
+    await chrome.storage.local.set({
+      [cacheKey]: {
+        isMalicious,
+        expires: Date.now() + 3600000 // 1 hour
+      }
+    });
+
+    return isMalicious;
+  } catch (error) {
+    console.error('Phishing check failed:', error);
+    return false;
+  }
+};
 
 export default function App() {
-  const [currentUrl, setCurrentUrl] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [tabId, setTabId] = useState<number | null>(null)
+  const [currentUrl, setCurrentUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [tabId, setTabId] = useState<number | null>(null);
+  const [isMalicious, setIsMalicious] = useState(false);
 
   useEffect(() => {
-    const getCurrentTab = async () => {
+    const fetchUrlAndCheck = async () => {
       try {
-        //@ts-ignore
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
-        if (tab && tab.id) {
-          setTabId(tab.id)
+        const [tab] = await chrome.tabs.query({ 
+          active: true, 
+          currentWindow: true 
+        });
+
+        if (tab?.id) {
+          setTabId(tab.id);
           
-          // Get the pending URL from the background script
-          //@ts-ignore
           chrome.runtime.sendMessage(
             { type: "GET_PENDING_URL", tabId: tab.id },
-            (response) => {
+            async (response) => {
               if (chrome.runtime.lastError) {
-                console.error('Error getting pending URL:', chrome.runtime.lastError);
+                console.error(chrome.runtime.lastError);
                 setIsLoading(false);
                 return;
               }
-              
-              if (response && response.url && response.url !== 'No pending navigation') {
-                setCurrentUrl(response.url)
-              } else {
-                setCurrentUrl('No pending navigation')
+
+              if (response?.url) {
+                setCurrentUrl(response.url);
+                const maliciousStatus = await checkPhishing(response.url);
+                setIsMalicious(maliciousStatus);
               }
-              setIsLoading(false)
+              setIsLoading(false);
             }
-          )
+          );
         }
       } catch (error) {
-        console.error('Error getting tab information:', error)
-        setIsLoading(false)
+        console.error('Error:', error);
+        setIsLoading(false);
       }
-    }
+    };
 
-    getCurrentTab()
-    
-    // Auto-close popup if no pending URL after 5 seconds
+    fetchUrlAndCheck();
+
     const timer = setTimeout(() => {
-      if (currentUrl === 'No pending navigation' || !currentUrl) {
-        window.close()
-      }
-    }, 5000)
-    
-    return () => clearTimeout(timer)
-  }, [])  // Only run on component mount
+      if (!currentUrl) window.close();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleApprove = () => {
     if (tabId) {
-      console.log("Approving URL for tab:", tabId);
-      //@ts-ignore
       chrome.runtime.sendMessage(
         { type: "APPROVE_URL", tabId },
         (response) => {
-          if (chrome.runtime.lastError) {
-            console.error('Error in approve message:', chrome.runtime.lastError);
-            return;
-          }
-          
-          if (response && response.success) {
-            window.close() // Close the popup after approval
-          } else {
-            console.error('Error approving URL:', response?.message)
-          }
+          if (response?.success) window.close();
         }
-      )
+      );
     }
-  }
+  };
 
   const handleBlock = () => {
     if (tabId) {
-      console.log("Blocking URL for tab:", tabId);
-      //@ts-ignore
-      
       chrome.runtime.sendMessage(
         { type: "BLOCK_URL", tabId },
-        //@ts-ignore
-        (response) => {
-          if (chrome.runtime.lastError) {
-            console.error('Error in block message:', chrome.runtime.lastError);
-            return;
-          }
-          
-          window.close() // Close the popup after blocking
-        }
-      )
+        () => window.close()
+      );
     }
-  }
+  };
 
   return (
     <div className="min-w-[400px] p-4 bg-gray-100 min-h-[200px]">
       <h1 className="text-xl font-bold mb-4">QuickPhish Protection</h1>
       
       {isLoading ? (
-        <div className="flex justify-center items-center h-24">
+        <div className="flex flex-col items-center justify-center h-32 gap-2">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700"></div>
+          <p className="text-gray-600 text-sm">Analyzing link safety...</p>
         </div>
       ) : (
         <>
           <div className="mb-4">
-            <h2 className="text-lg font-semibold mb-2">Approve navigation to:</h2>
+            <h2 className={`text-lg font-semibold mb-2 ${
+              isMalicious ? 'text-red-600' : 'text-gray-800'
+            }`}>
+              {isMalicious ? '⚠️ Dangerous Link Detected' : 'Safe Navigation Approval'}
+            </h2>
             <div className="p-3 bg-white rounded-md break-all border border-gray-300">
-              <code className="text-sm text-blue-600">{currentUrl}</code>
+              <code className={`text-sm ${isMalicious ? 'text-red-600' : 'text-gray-700'}`}>
+                {currentUrl}
+              </code>
             </div>
           </div>
-          
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-            <p className="text-sm text-yellow-700">
-              For your protection, please review this URL before continuing.
-            </p>
-          </div>
-          
+
+          {isMalicious && (
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+              <p className="text-sm text-red-700">
+                This link matches known phishing patterns or suspicious characteristics. 
+                Proceeding may risk your security.
+              </p>
+            </div>
+          )}
+
           <div className="flex justify-end space-x-2">
             <button 
-              onClick={handleBlock} 
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
-              Block
+              onClick={handleBlock}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"
+            >
+              {isMalicious ? 'Block & Report' : 'Cancel Navigation'}
             </button>
-            <button 
-              onClick={handleApprove} 
-              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
-              Approve
+            <button
+              onClick={handleApprove}
+              className={`${
+                isMalicious 
+                  ? 'bg-yellow-500 hover:bg-yellow-600'
+                  : 'bg-green-500 hover:bg-green-600'
+              } text-white px-4 py-2 rounded-md transition-colors`}
+            >
+              {isMalicious ? 'Proceed Anyway' : 'Approve Navigation'}
             </button>
           </div>
         </>
       )}
     </div>
-  )
+  );
 }
