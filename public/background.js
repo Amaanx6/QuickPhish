@@ -1,33 +1,22 @@
 // Listen for tab creation events
 chrome.tabs.onCreated.addListener((tab) => {
-    // Skip opening popup for blank or default new tabs
-    if (tab.url === 'chrome://newtab/' || tab.url === 'about:blank') {
-      return;
-    }
-    
-    // For all other new tabs, immediately show our approval popup
+    // Open the extension popup when a new tab is created
     chrome.action.openPopup();
   });
   
-  // Listen for navigation events in tabs
-  chrome.webNavigation && chrome.webNavigation.onBeforeNavigate.addListener((details) => {
-    // Skip our own extension pages and Chrome internal pages
-    if (details.url.startsWith('chrome://') || 
-        details.url === 'about:blank' ||
-        details.url.startsWith('chrome-extension://')) {
-      return;
-    }
-    
-    // Only interrupt navigation on the main frame, not iframes or other sub-resources
-    if (details.frameId === 0) {
-      // This is the main frame navigation, pause it and show our popup
-      chrome.tabs.get(details.tabId, (tab) => {
-        // Don't interrupt the new tab page
-        if (tab.url !== 'chrome://newtab/' && tab.url !== 'about:blank') {
-          // We'll temporarily redirect to about:blank to pause the navigation
-          chrome.tabs.update(details.tabId, { url: 'about:blank' });
-          
-          // Then open our popup to ask for confirmation
+  // Listen for tab activation events (when user switches tabs)
+  chrome.tabs.onActivated.addListener((activeInfo) => {
+    // When a user switches to any tab, open the popup
+    chrome.action.openPopup();
+  });
+  
+  // Listen for tab updates (when page content changes/loads)
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    // For all tabs that complete loading
+    if (changeInfo.status === 'complete') {
+      // Check if this tab is the active tab in the current window
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0] && tabs[0].id === tabId) {
           chrome.action.openPopup();
         }
       });
