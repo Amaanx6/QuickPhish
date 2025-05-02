@@ -108,11 +108,11 @@ export function CheckUrlMain() {
 
     fetchUrlAndCheck();
 
-    const timer = setTimeout(() => {
-      if (!currentUrl) window.close();
-    }, 5000);
+    // const timer = setTimeout(() => {
+    //   if (!currentUrl) window.close();
+    // }, 10000);
 
-    return () => clearTimeout(timer);
+    // return () => clearTimeout(timer);
   }, []);
 
   const handleApprove = () => {

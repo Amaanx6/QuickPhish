@@ -1,9 +1,10 @@
-import { CheckUrlMain } from "./Components/CheckUrlMain";
+import Layout from "./Components/Layout";
+
 export default function App() {
   
   return (
     <div>
-      <CheckUrlMain />
+      <Layout />
     </div>
     
   );
