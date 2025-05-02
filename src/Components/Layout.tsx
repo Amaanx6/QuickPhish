@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Sidebar from './Sidebar';
 import { CheckUrlMain } from './CheckUrlMain';
-import Comp3 from './Settings';
+import ChatBot from './Chatbot'; // Fixed casing from './Chatbot' to './ChatBot'
 import Comp2 from './Learn';
 import Comp1 from './History';
 
@@ -10,19 +10,21 @@ type ActivePanel = 'main' | 'comp1' | 'comp2' | 'comp3';
 
 const Layout: React.FC = () => {
   const [activePanel, setActivePanel] = useState<ActivePanel>('main');
-  
+  const [isMalicious, setIsMalicious] = useState<boolean | null>(null);
+  const [currentUrl, setCurrentUrl] = useState<string>('');
+
   const renderActivePanel = () => {
     switch (activePanel) {
       case 'main':
-        return <CheckUrlMain activePanel={activePanel} />;
+        return <CheckUrlMain activePanel={activePanel} setIsMalicious={setIsMalicious} setCurrentUrl={setCurrentUrl} />;
       case 'comp1':
         return <Comp1 />;
       case 'comp2':
         return <Comp2 />;
       case 'comp3':
-        return <Comp3 />;
+        return <ChatBot isMalicious={isMalicious} currentUrl={currentUrl} />;
       default:
-        return <CheckUrlMain activePanel={activePanel} />;
+        return <CheckUrlMain activePanel={activePanel} setIsMalicious={setIsMalicious} setCurrentUrl={setCurrentUrl} />;
     }
   };
 
