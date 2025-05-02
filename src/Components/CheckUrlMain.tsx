@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, AlertTriangle, ExternalLink } from 'lucide-react';
 import GlassMorphism from './GlassMorphism';
-import StatusIndicator from './StatusIndicator';
 
 // Phishing detection service
 const checkPhishing = async (url: string): Promise<boolean> => {
@@ -254,11 +253,6 @@ export function CheckUrlMain({
           QuickPhish
         </h1>
         
-        {(isScanning || localIsMalicious !== null) && (
-          <StatusIndicator 
-            status={isScanning ? 'scanning' : localIsMalicious ? 'danger' : 'safe'} 
-          />
-        )}
       </motion.div>
       
       {isScanning || localIsMalicious === null ? (

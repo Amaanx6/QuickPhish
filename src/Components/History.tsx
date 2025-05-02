@@ -40,31 +40,33 @@ const Comp1 = () => {
       <div className="mb-6 grid grid-cols-2 gap-4">
         <GlassMorphism variant="card" className="p-4">
           <div className="flex items-center">
-            <div className="p-2 rounded-full bg-blue-500 bg-opacity-20 mr-3">
-              <Shield className="w-5 h-5 text-blue-400" />
+            <div className="p-2 rounded-full bg-blue-500 bg-opacity-20 mr-2">
+              <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-300">Protected</h3>
-              <p className="text-xl font-bold text-white">{protectedCount}</p>
-            </div>
+              <h3 className="text-sm font-medium text-black">Protected</h3>
+              <p className="text-xl font-bold text-blue-500">{protectedCount}</p>
+            </div> 
           </div>
         </GlassMorphism>
         
-        <GlassMorphism variant="card" className="p-4">
+        <GlassMorphism variant="card" className="p-4">   
           <div className="flex items-center">
-            <div className="p-2 rounded-full bg-red-500 bg-opacity-20 mr-3"> 
-              <Shield className="w-5 h-5 text-red-400" />
+
+            <div className="p-2 rounded-full bg-red-500 bg-opacity-20 mr-2">
+              <Shield className="w-5 h-5 text-white" />
+
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-300">Blocked</h3>
-              <p className="text-xl font-bold text-white">{blockedCount}</p>
+              <h3 className="text-sm font-medium text-black">Blocked</h3>
+              <p className="text-xl font-bold text-red-500">{blockedCount}</p>
             </div>
           </div>
         </GlassMorphism>
       </div>
 
-      <h2 className="text-lg font-semibold mb-4 flex items-center">
-        <Clock className="w-4 h-4 mr-2 text-blue-400" />
+      <h2 className="text-lg font-semibold mb-4  text-blue-500 flex items-center">
+        <Clock className="w-4 h-4 mr-2 bg-white" />
         Recent Scans
       </h2>
 
@@ -86,7 +88,7 @@ const Comp1 = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center mb-1">
                       <div className={`w-2 h-2 rounded-full ${scan.safe ? 'bg-green-400' : 'bg-red-400'} mr-2`}></div>
-                      <h3 className="text-sm font-medium truncate">{scan.url}</h3>
+                      <h3 className={`text-sm font-medium truncate ${scan.safe ? 'text-green-400' : 'text-red-400'}`}>{scan.url}</h3>
                     </div>
                     <div className="flex items-center text-xs text-gray-400">
                       <Calendar className="w-3 h-3 mr-1" />
