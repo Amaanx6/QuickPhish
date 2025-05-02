@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Sidebar from './Sidebar';
 import { CheckUrlMain } from './CheckUrlMain';
-import Comp3 from './Comp3';
-import Comp2 from './Comp2';
-import Comp1 from './Comp1';
+import Comp3 from './Settings';
+import Comp2 from './Learn';
+import Comp1 from './History';
 
 type ActivePanel = 'main' | 'comp1' | 'comp2' | 'comp3';
 
