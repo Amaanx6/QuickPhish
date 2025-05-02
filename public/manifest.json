@@ -6,7 +6,8 @@
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "index.html",
-    "default_title": "QuickPhish Protection"
+    "default_title": "QuickPhish Protection",
+    "default_icon": "icons/icon.png"
   },
   "background": {
     "service_worker": "background.js",
