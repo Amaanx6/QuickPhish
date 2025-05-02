@@ -5,12 +5,14 @@ interface GlassProps {
   children: ReactNode;
   className?: string;
   variant?: 'default' | 'card' | 'button' | 'sidebar';
+  onClick?: () => void; // Added onClick prop
 }
 
 const GlassMorphism: React.FC<GlassProps> = ({ 
   children, 
   className, 
-  variant = 'default' 
+  variant = 'default',
+  onClick // Added onClick to destructuring
 }) => {
   const baseClasses = "relative overflow-hidden rounded-xl";
   
@@ -22,7 +24,10 @@ const GlassMorphism: React.FC<GlassProps> = ({
   };
   
   return (
-    <div className={cn(baseClasses, variantClasses[variant], className)}>
+    <div 
+      className={cn(baseClasses, variantClasses[variant], className)}
+      onClick={onClick} // Added onClick handler
+    >
       {/* Glass shine effect at the top */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-white bg-opacity-20"></div>
       {children}
