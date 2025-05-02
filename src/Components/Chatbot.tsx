@@ -76,7 +76,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
   const callGeminiAPI = async (prompt: string): Promise<string> => {
     try {
       const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-      if (!API_KEY) throw new Error('Gemini API key is not configured');
+      if (!API_KEY) throw new Error('API key is not configured');
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`,
         {
@@ -96,11 +96,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
         }
       );
 
-      if (!response.ok) throw new Error(`Gemini API request failed: ${response.status}`);
+      if (!response.ok) throw new Error(`API request failed: ${response.status}`);
       const data = await response.json();
       return data.candidates[0].content.parts[0].text;
     } catch (error) {
-      console.error('Gemini API error:', error);
+      console.error('API error:', error);
       return 'Sorry, I encountered an error. Please try again.';
     }
   };
@@ -190,18 +190,22 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
                 >
                   <div className="flex items-center mb-1">
                     {message.role === 'bot' && (
-                      <motion.div
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <MessageCircle className="w-4 h-4 mr-2 text-blue-400" />
-                      </motion.div>
+                      <>
+                        <motion.div
+                          whileHover={{ rotate: 360 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <MessageCircle className="w-4 h-4 mr-2 text-blue-400" />
+                        </motion.div>
+                        <span className="text-xs bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                          {message.timestamp}
+                        </span>
+                      </>
                     )}
-                    <span className="text-xs bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-                      {message.timestamp}
-                    </span>
                   </div>
-                  <p className="text-sm text-black">{message.content}</p>
+                  <p className={`text-sm ${message.role === 'user' ? 'text-white' : 'text-black'}`}>
+                    {message.content}
+                  </p>
                 </motion.div>
               </motion.div>
             ))}
@@ -218,7 +222,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask about the URL or phishing..."
-              className="flex-1 p-3 bg-white bg-opacity-10 backdrop-blur-md text-white rounded-xl border border-blue-500 border-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition-all resize-none"
+              className="flex-1 p-3 bg-white bg-opacity-15 backdrop-blur-md text-gray-100 rounded-xl border border-blue-500 border-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition-all resize-none"
               rows={2}
               disabled={isLoading}
             />
