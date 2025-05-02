@@ -87,7 +87,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isMalicious, currentUrl }) => {
               {
                 parts: [
                   {
-                    text: prompt,
+                    text: `You are a cybersecurity assistant for the QuickPhish browser extension. Provide concise, accurate answers about phishing, URLs, and web safety. For the URL "${currentUrl}", which is ${isMalicious ? 'malicious' : 'safe'}, respond to: ${prompt}`,
                   },
                 ],
               },
