@@ -98,6 +98,23 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
                 setCurrentUrl(response.url);
                 const maliciousStatus = await checkPhishing(response.url);
                 setIsMalicious(maliciousStatus);
+
+                // Store scan result in local storage
+                const scanResult = {
+                  url: response.url,
+                  date: new Date().toLocaleString(),
+                  safe: !maliciousStatus
+                };
+                chrome.storage.local.get(['scanHistory', 'protectedCount'], (result) => {
+                  const scanHistory = result.scanHistory || [];
+                  const protectedCount = result.protectedCount || 0;
+                  scanHistory.unshift(scanResult); // Add to start of array
+                  if (scanHistory.length > 50) scanHistory.pop(); // Limit to 50 entries
+                  chrome.storage.local.set({
+                    scanHistory,
+                    protectedCount: maliciousStatus ? protectedCount : protectedCount + 1
+                  });
+                });
               }
             }
           );
@@ -135,6 +152,11 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
         { type: "APPROVE_URL", tabId },
         (response) => {
           if (response?.success && isMalicious && activePanel === 'main') {
+            // Increment blockedCount for malicious URLs approved
+            chrome.storage.local.get(['blockedCount'], (result) => {
+              const blockedCount = result.blockedCount || 0;
+              chrome.storage.local.set({ blockedCount: blockedCount + 1 });
+            });
             window.close(); // Close popup only after user approval for malicious
           }
         }
@@ -148,6 +170,11 @@ export function CheckUrlMain({ activePanel }: { activePanel: string }) {
         { type: "BLOCK_URL", tabId },
         () => {
           if (activePanel === 'main') {
+            // Increment blockedCount for malicious URLs blocked
+            chrome.storage.local.get(['blockedCount'], (result) => {
+              const blockedCount = result.blockedCount || 0;
+              chrome.storage.local.set({ blockedCount: blockedCount + 1 });
+            });
             window.close(); // Close popup after blocking
           }
         }
