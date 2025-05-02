@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Sidebar from './Sidebar';
-import {CheckUrlMain} from './CheckUrlMain';
-import Comp3 from './Comp3';
-import Comp2 from './Comp2';
-import Comp1 from './Comp1';
+import { CheckUrlMain } from './CheckUrlMain';
+import Comp3 from './Settings';
+import Comp2 from './Learn';
+import Comp1 from './History';
+
 type ActivePanel = 'main' | 'comp1' | 'comp2' | 'comp3';
 
 const Layout: React.FC = () => {
@@ -13,7 +14,7 @@ const Layout: React.FC = () => {
   const renderActivePanel = () => {
     switch (activePanel) {
       case 'main':
-        return <CheckUrlMain/>;
+        return <CheckUrlMain />;
       case 'comp1':
         return <Comp1 />;
       case 'comp2':
@@ -26,7 +27,7 @@ const Layout: React.FC = () => {
   };
 
   return (
-    <div className="flex h-[600px] w-[400px] bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+    <div className="flex h-[600px] w-[400px] overflow-hidden app-background text-white">
       <Sidebar activePanel={activePanel} setActivePanel={setActivePanel} />
       <motion.main 
         className="flex-1 overflow-hidden"

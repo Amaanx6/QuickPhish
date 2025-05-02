@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Clock, BookOpen, Settings } from 'lucide-react';
-import { NavItem } from '../types';
+import { Shield, Clock, BookOpen, Settings, AlertCircle } from 'lucide-react';
+import { NavItem } from './types';
+import GlassMorphism from './GlassMorphism';
 
 interface SidebarProps {
   activePanel: string;
@@ -10,14 +11,14 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
   const navItems: NavItem[] = [
-    { name: 'main', icon: 'shield', id: 'main' },
-    { name: 'comp1', icon: 'clock', id: 'comp1' },
-    { name: 'comp2', icon: 'book', id: 'comp2' },
-    { name: 'comp3', icon: 'settings', id: 'comp3' },
+    { name: 'Protect', icon: 'shield', id: 'main' },
+    { name: 'History', icon: 'clock', id: 'comp1' },
+    { name: 'Learn', icon: 'book', id: 'comp2' },
+    { name: 'Settings', icon: 'settings', id: 'comp3' },
   ];
 
   const getIcon = (iconName: string, isActive: boolean) => {
-    const className = `w-5 h-5 ${isActive ? 'text-blue-500' : 'text-gray-500 group-hover:text-blue-400'}`;
+    const className = `w-5 h-5 ${isActive ? 'text-blue-400' : 'text-gray-400 group-hover:text-blue-300'}`;
     
     switch (iconName) {
       case 'shield':
@@ -34,51 +35,103 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
   };
 
   return (
-    <motion.div 
-      className="w-16 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col items-center py-4"
-      initial={{ x: -20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.3 }}
+    <GlassMorphism 
+      variant="sidebar"
+      className="w-20 flex flex-col items-center py-6 z-10"
     >
-      <div className="mb-8">
+      <motion.div 
+        className="mb-10"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+      >
         <motion.div 
-          className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center"
-          whileHover={{ scale: 1.1 }}
+          className="w-12 h-12 relative flex items-center justify-center"
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <Shield className="w-6 h-6 text-white" />
+          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-600"></div>
+          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 blur-sm opacity-70"></div>
+          <Shield className="w-6 h-6 text-white relative z-10" />
         </motion.div>
-      </div>
+      </motion.div>
       
       <nav className="flex-1 w-full">
-        <ul className="space-y-4">
-          {navItems.map((item) => (
-            <li key={item.id}>
+        <ul className="space-y-6">
+          {navItems.map((item, index) => (
+            <motion.li 
+              key={item.id}
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: index * 0.1, duration: 0.3 }}
+            >
               <motion.button
-                className={`w-full flex flex-col items-center py-2 px-1 group ${
-                  activePanel === item.id 
-                    ? 'text-blue-500' 
-                    : 'text-gray-500 hover:text-blue-400'
-                }`}
+                className={`w-full flex flex-col items-center py-2 px-1 group relative`}
                 onClick={() => setActivePanel(item.id as 'main' | 'comp1' | 'comp2' | 'comp3')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {getIcon(item.icon, activePanel === item.id)}
-                <span className="text-xs mt-1 font-medium">{item.name}</span>
                 {activePanel === item.id && (
                   <motion.div 
-                    className="absolute left-0 w-1 h-8 bg-blue-500 rounded-r-md"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-blue-400 to-purple-500 rounded-r-md"
                     layoutId="activeIndicator"
                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   />
                 )}
+                
+                <div className={`relative p-2 rounded-lg transition-all duration-300 ${
+                  activePanel === item.id 
+                    ? 'bg-white bg-opacity-10' 
+                    : 'hover:bg-white hover:bg-opacity-5'
+                }`}>
+                  {getIcon(item.icon, activePanel === item.id)}
+                  
+                  {item.id === 'main' && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white border-opacity-30"></div>
+                  )}
+                </div>
+                
+                <span className={`text-xs mt-1 font-medium transition-colors duration-300 ${
+                  activePanel === item.id 
+                    ? 'text-blue-400' 
+                    : 'text-gray-400 group-hover:text-blue-300'
+                }`}>
+                  {item.name}
+                </span>
               </motion.button>
-            </li>
+            </motion.li>
           ))}
         </ul>
       </nav>
-    </motion.div>
+      
+      <motion.div 
+        className="mt-auto pt-4"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.4 }}
+      >
+        <div className="relative">
+          <motion.div 
+            className="w-8 h-8 rounded-full bg-amber-500 bg-opacity-20 flex items-center justify-center"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            initial={{ scale: 1 }}
+            animate={{ 
+              scale: [1, 1.1, 1],
+              rotate: [0, 0, 0]
+            }}
+            transition={{ 
+              repeat: Infinity,
+              repeatDelay: 4,
+              duration: 0.8
+            }}
+          >
+            <AlertCircle className="w-4 h-4 text-amber-400" />
+          </motion.div>
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border border-gray-900"></span>
+        </div>
+      </motion.div>
+    </GlassMorphism>
   );
 };
 
