@@ -1,54 +1,78 @@
-# React + TypeScript + Vite
+# 🛡️ QuickPhish – Real-Time Phishing Link Warnings
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**QuickPhish** is a privacy-first browser extension for Chrome and Edge that detects phishing links in real time — **anywhere on the web**. Whether you're browsing Gmail, social media, online forums, or unknown websites, QuickPhish intercepts suspicious links and warns you *before* you get phished.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚨 Why QuickPhish?
 
-## Expanding the ESLint configuration
+Phishing isn’t limited to email anymore — attackers use social media, online ads, chat apps, and even blogs to trick users into clicking malicious links. QuickPhish protects users by scanning links **at click time**, using the **Google Safe Browsing API**, and displaying an alert before redirection occurs.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
+
+## ✨ Features
+
+- 🌐 Works on **every website** (not just Gmail or Outlook)
+- ⚡ Real-time link checking via **Google Safe Browsing API**
+- 🚫 Instantly blocks access to known phishing or malware URLs
+- 🧠 Lightweight and fast (<1 second response time)
+- 🧩 Built with Manifest V3 for Chrome & Edge
+
+
+## 🔧 How It Works
+
+1. Listens for link clicks anywhere in the browser
+2. Intercepts and queries the **Google Safe Browsing API**
+3. If the link is malicious:
+   - Displays a **warning modal**
+   - Lets you choose to proceed or cancel
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/QuickPhish.git
+cd QuickPhish
+````
+
+### 2. Set Your Google Safe Browsing API Key
+
+1. Visit the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project
+3. Enable the **Safe Browsing API**
+4. Generate an **API key**
+5. In `content.js`, set your API key:
 
 ```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+const GOOGLE_API_KEY = "YOUR_API_KEY";
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🌍 Installation (Chrome / Edge)
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+1. Go to `chrome://extensions` (or `edge://extensions`)
+2. Enable **Developer Mode**
+3. Click **Load unpacked**
+4. Select the `quickphish-extension/` folder
+
+---
+
+
+## 📌 Notes
+
+* This extension does not store or track any user data.
+* Link checking happens client-side using the **official Google API**.
+* The API key is required but can be secured via a backend proxy if needed.
+
+
+## 📄 License
+
+Licensed under the **MIT License**.
+
+---
+
+
