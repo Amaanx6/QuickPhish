@@ -67,9 +67,9 @@ const checkPhishing = async (url: string): Promise<boolean> => {
 
 export function CheckUrlMain() {
   const [currentUrl, setCurrentUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isScanning, setIsScanning] = useState(true);
   const [tabId, setTabId] = useState<number | null>(null);
-  const [isMalicious, setIsMalicious] = useState(false);
+  const [isMalicious, setIsMalicious] = useState<boolean | null>(null);
   const [showSafeNotification, setShowSafeNotification] = useState(false);
 
   useEffect(() => {
@@ -88,7 +88,6 @@ export function CheckUrlMain() {
             async (response) => {
               if (chrome.runtime.lastError) {
                 console.error(chrome.runtime.lastError);
-                setIsLoading(false);
                 return;
               }
 
@@ -96,30 +95,34 @@ export function CheckUrlMain() {
                 setCurrentUrl(response.url);
                 const maliciousStatus = await checkPhishing(response.url);
                 setIsMalicious(maliciousStatus);
-
-                if (!maliciousStatus) {
-                  // Automatically approve safe URLs
-                  handleApprove();
-                  // Show safe notification briefly
-                  setShowSafeNotification(true);
-                  setTimeout(() => {
-                    setShowSafeNotification(false);
-                    window.close();
-                  }, 3000); // Hide after 3 seconds
-                }
               }
-              setIsLoading(false);
             }
           );
         }
       } catch (error) {
         console.error('Error:', error);
-        setIsLoading(false);
       }
     };
 
     fetchUrlAndCheck();
-  }, []);
+
+    // Set a 2-second timer for scanning
+    const scanningTimer = setTimeout(() => {
+      setIsScanning(false);
+      // If not malicious, approve and show safe notification
+      if (isMalicious === false && tabId) {
+        handleApprove();
+        setShowSafeNotification(true);
+        setTimeout(() => {
+          setShowSafeNotification(false);
+          window.close();
+        }, 3000); // Close after 3 seconds
+      }
+    }, 2000); // 2 seconds for scanning
+
+    // Cleanup timer on component unmount
+    return () => clearTimeout(scanningTimer);
+  }, [isMalicious, tabId]);
 
   const handleApprove = () => {
     if (tabId) {
@@ -127,7 +130,9 @@ export function CheckUrlMain() {
         { type: "APPROVE_URL", tabId },
         (response) => {
           if (response?.success) {
-            window.close(); // Close popup for both safe and malicious after approval
+            if (isMalicious) {
+              window.close(); // Close popup only after user approval for malicious
+            }
           }
         }
       );
@@ -147,10 +152,10 @@ export function CheckUrlMain() {
     <div className="min-w-[400px] p-4 bg-gray-100 min-h-[200px]">
       <h1 className="text-xl font-bold mb-4">QuickPhish Protection</h1>
       
-      {isLoading ? (
+      {isScanning || isMalicious === null ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700"></div>
-          <p className="text-gray-600 text-sm">Analyzing link safety...</p>
+          <p className="text-gray-600 text-sm">Scanning website...</p>
         </div>
       ) : showSafeNotification ? (
         <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-4">
