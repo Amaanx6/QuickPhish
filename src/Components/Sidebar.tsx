@@ -12,9 +12,9 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
   const navItems: NavItem[] = [
     { name: 'Protect', icon: 'shield', id: 'main' },
-    { name: 'History', icon: 'clock', id: 'comp1' },
+    { name: 'ChatBot', icon: 'message', id: 'comp3' }, 
     { name: 'Learn', icon: 'book', id: 'comp2' },
-    { name: 'ChatBot', icon: 'message', id: 'comp3' },
+    { name: 'History', icon: 'clock', id: 'comp1' },    
   ];
 
   const getIcon = (iconName: string, isActive: boolean) => {
